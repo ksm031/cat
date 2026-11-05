@@ -1,6 +1,5 @@
 import { WORLD, clamp, lerp } from '../core/math.js';
-import { drawCat, drawCatSprite } from './drawCat.js';
-import { sprites, LURE_SPRITE } from './sprites.js';
+import { drawCat } from './drawCat.js';
 import { drawRoom } from './drawRoom.js';
 import { Fx, heart } from './Fx.js';
 
@@ -142,9 +141,7 @@ export class Renderer {
     };
     const lureBehind = cat.state === 'hold';
     if (!lureBehind) this.drawRod(ctx, lure, session);
-    const set = sprites.forLook(stage.look);
-    if (set) drawCatSprite(ctx, cat, set, time);
-    else drawCat(ctx, cat, stage.look, time, view); // 아트 미로드 시 벡터 폴백
+    drawCat(ctx, cat, stage.look, time, view);
     if (lureBehind) this.drawRod(ctx, lure, session);
 
     // 상태 아이콘
@@ -173,35 +170,17 @@ export class Renderer {
     ctx.beginPath(); ctx.moveTo(handX, handY); ctx.lineTo(lerp(handX, tipX, 0.55), lerp(handY, tipY, 0.55)); ctx.stroke();
     ctx.lineWidth = 6;
     ctx.beginPath(); ctx.moveTo(lerp(handX, tipX, 0.5), lerp(handY, tipY, 0.5)); ctx.lineTo(tipX, tipY); ctx.stroke();
-    const ang = clamp(-lure.vx * 0.0012, -1.2, 1.2); // 이동 반대 방향으로 깃털이 끌림
-    // 줄 (스프라이트면 고리에 연결)
-    let ex = lure.x, ey = lure.y;
-    if (sprites.ready) {
-      const L = LURE_SPRITE, sc = L.scale;
-      const rx = (L.ring[0] - L.anchor[0]) * sc, ry = (L.ring[1] - L.anchor[1]) * sc;
-      ex = lure.x + rx * Math.cos(ang) - ry * Math.sin(ang);
-      ey = lure.y + rx * Math.sin(ang) + ry * Math.cos(ang);
-    }
+    // 줄
     ctx.strokeStyle = 'rgba(60,40,30,0.75)';
     ctx.lineWidth = 2;
-    const sag = Math.max(0, 80 - Math.hypot(ex - tipX, ey - tipY) * 0.1);
+    const sag = Math.max(0, 80 - Math.hypot(lure.x - tipX, lure.y - tipY) * 0.1);
     ctx.beginPath();
     ctx.moveTo(tipX, tipY);
-    ctx.quadraticCurveTo((tipX + ex) / 2, (tipY + ey) / 2 + sag, ex, ey);
+    ctx.quadraticCurveTo((tipX + lure.x) / 2, (tipY + lure.y) / 2 + sag, lure.x, lure.y);
     ctx.stroke();
 
-    if (sprites.ready) {
-      const L = LURE_SPRITE, sc = L.scale, img = sprites.lure;
-      const flutter = Math.sin(lure.time * 28) * Math.min(1, lure.wiggle) * 0.08;
-      ctx.save();
-      ctx.translate(lure.x, lure.y);
-      ctx.rotate(ang + flutter);
-      ctx.drawImage(img, -L.anchor[0] * sc, -L.anchor[1] * sc, img.width * sc, img.height * sc);
-      ctx.restore();
-      return;
-    }
-
-    // 깃털 장난감 (벡터 폴백)
+    // 깃털 장난감
+    const ang = clamp(-lure.vx * 0.0012, -1.2, 1.2); // 이동 반대 방향으로 깃털이 끌림
     ctx.save();
     ctx.translate(lure.x, lure.y);
     ctx.rotate(ang);

@@ -1,10 +1,7 @@
 import { clamp, lerp, WORLD } from './math.js';
 
 const FLOOR = WORLD.FLOOR;
-// 점프 시 앞발 위치 / 잡았을 때 장난감 위치 (고양이 로컬 좌표, 오른쪽을 바라볼 때, size 1 기준)
-// 아트(render/sprites.js)의 기준점과 맞춰둔 값 — 아트 교체 시 함께 조정
-const PAW_LOCAL = { x: 76, y: -118 };
-const HOLD_LOCAL = { x: 77, y: -119 };
+const PAW_LOCAL = { x: 70, y: -40 }; // 점프 시 앞발 위치(고양이 로컬 좌표, 오른쪽을 바라볼 때)
 const FALL_TIME = 0.28;
 const HOLD_LAND = 0.22;
 
@@ -52,7 +49,7 @@ export class Cat {
   }
 
   get pawLocal() { return { x: PAW_LOCAL.x * this.size, y: PAW_LOCAL.y * this.size }; }
-  get holdPoint() { return { x: this.x + this.facing * HOLD_LOCAL.x * this.size, y: FLOOR + HOLD_LOCAL.y * this.size }; }
+  get holdPoint() { return { x: this.x + this.facing * 58 * this.size, y: FLOOR - 30 * this.size }; }
   get headPos() { return { x: this.x + this.facing * 60 * this.size, y: FLOOR - 105 * this.size }; }
 
   set(s) { this.state = s; this.t = 0; this.cued = false; }
@@ -236,7 +233,7 @@ export class Cat {
     ay = clamp(ay, FLOOR - c.reachY * 1.05, FLOOR - 12);
     this.facing = ax >= this.x ? 1 : -1;
     const pl = this.pawLocal;
-    this.p0 = { x: this.x + this.facing * pl.x * 0.6, y: FLOOR + pl.y * 1.2 }; // 점프 시작 앞발 높이 (아트 뒷발이 바닥을 뚫지 않게)
+    this.p0 = { x: this.x + this.facing * pl.x * 0.6, y: FLOOR + pl.y * 0.6 };
     this.aim = { x: ax, y: ay };
     this.paw = { ...this.p0 };
     this.pawV = { x: 0, y: 0 };
