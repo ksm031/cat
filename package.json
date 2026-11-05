@@ -1,0 +1,11 @@
+{
+  "name": "cat-teaser-game",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "고양이 낚싯대 미니게임 (웹, 모바일 우선 / PC·콘솔 포팅 고려)",
+  "scripts": {
+    "start": "node tools/serve.mjs",
+    "balance": "node tools/balance.mjs"
+  }
+}

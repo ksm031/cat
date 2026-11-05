@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#2b1d14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>냥냥 낚싯대</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <canvas id="game" aria-label="게임 화면"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hud hidden">
+    <div class="hud-row">
+      <button id="btn-pause" class="hud-btn" aria-label="일시정지">Ⅱ</button>
+      <div class="hud-title"><b id="hud-stage"></b><span id="hud-cat"></span></div>
+      <div id="hud-time" class="hud-time">0</div>
+    </div>
+    <div class="meter big">
+      <span class="lbl">도파민</span>
+      <div class="bar"><div id="bar-dopa" class="fill dopa"></div></div>
+      <span id="txt-dopa" class="val">0%</span>
+    </div>
+    <div class="hud-row small">
+      <div class="meter">
+        <span class="lbl">흥미</span>
+        <div class="bar"><div id="bar-interest" class="fill interest"></div><i id="mark-pounce" class="mark"></i></div>
+      </div>
+      <div class="meter">
+        <span class="lbl">흥분도</span>
+        <div class="bar"><div id="bar-tension" class="fill tension"></div></div>
+      </div>
+    </div>
+    <div id="hud-mood" class="mood"></div>
+  </div>
+  <div id="hint" class="hint hidden"></div>
+  <div id="banner" class="banner hidden"></div>
+
+  <!-- 화면들 -->
+  <section class="screen" data-screen="title">
+    <div class="panel title-panel">
+      <div class="logo">🐾 냥냥 낚싯대</div>
+      <p class="sub">시간 안에 고양이의 <b>도파민</b>을 MAX로!</p>
+      <div class="menu">
+        <button class="btn primary" data-act="play">시작하기</button>
+        <button class="btn" data-act="howto">조작법 · 규칙</button>
+        <button class="btn" data-act="touchmode" data-touch-only>터치 방식: <span id="lbl-touch"></span></button>
+        <button class="btn" data-act="sound">소리: <span id="lbl-sound"></span></button>
+      </div>
+      <p class="device-hint" id="device-hint"></p>
+    </div>
+  </section>
+
+  <section class="screen" data-screen="stages">
+    <div class="panel">
+      <h2>스테이지 선택</h2>
+      <div id="stage-list" class="stage-list"></div>
+      <button class="btn" data-act="back">뒤로</button>
+    </div>
+  </section>
+
+  <section class="screen" data-screen="howto">
+    <div class="panel howto">
+      <h2>어떻게 놀아주나요?</h2>
+      <ol>
+        <li><b>흔들기</b> — 낚싯대를 흔들면 <span class="c-int">흥미</span>가 올라요. 흥미가 표시선을 넘으면 고양이가 덮칠 준비를 해요.</li>
+        <li><b>웅크림 → 멈칫(!!)</b> — 엉덩이를 씰룩이다 멈추면 곧 덮쳐요. 이때 <b>살짝</b> 빼면 “아깝다!”</li>
+        <li><b>아깝게 놓칠수록</b> <span class="c-ten">흥분도</span>가 쌓여요. 흥분도가 높을 때 <b>잡혀주면</b> <span class="c-dopa">도파민</span> 대량 획득!</li>
+        <li><b>너무 안 잡히면</b> 고양이가 시큰둥해지다 결국 삐져요. 크게 빗나가면(“너무 멀어…”) 흥미가 확 떨어져요.</li>
+        <li><b>너무 쉽게 잡히면</b> 도파민이 조금밖에 안 올라요. 연속으로 시시하면 고양이가 질려요.</li>
+      </ol>
+      <p class="tip">💡 요령: 아깝게 2~3번 → 흥분도 높을 때 잡혀주기</p>
+      <table class="controls">
+        <thead><tr><th></th><th>터치</th><th>마우스</th><th>키보드</th><th>게임패드</th></tr></thead>
+        <tbody>
+          <tr><th>이동</th><td>드래그</td><td>이동</td><td>WASD/방향키</td><td>L 스틱</td></tr>
+          <tr><th>툭 튕기기</th><td>탭</td><td>클릭</td><td>Space</td><td>Ⓐ / RT</td></tr>
+          <tr><th>일시정지</th><td>Ⅱ 버튼</td><td>Esc</td><td>Esc</td><td>≡ 메뉴</td></tr>
+        </tbody>
+      </table>
+      <button class="btn primary" data-act="back">알겠어요</button>
+    </div>
+  </section>
+
+  <section class="screen" data-screen="pause">
+    <div class="panel">
+      <h2>일시정지</h2>
+      <div class="menu">
+        <button class="btn primary" data-act="resume">계속하기</button>
+        <button class="btn" data-act="retry">다시하기</button>
+        <button class="btn" data-act="howto">조작법 · 규칙</button>
+        <button class="btn" data-act="stages">스테이지 선택</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-screen="result">
+    <div class="panel">
+      <h2 id="res-title"></h2>
+      <div id="res-stars" class="stars"></div>
+      <p id="res-msg" class="res-msg"></p>
+      <ul id="res-stats" class="res-stats"></ul>
+      <div class="menu">
+        <button class="btn primary" data-act="next" id="btn-next">다음 스테이지</button>
+        <button class="btn" data-act="retry">다시하기</button>
+        <button class="btn" data-act="stages">스테이지 선택</button>
+      </div>
+    </div>
+  </section>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
