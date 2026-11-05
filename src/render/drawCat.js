@@ -1,3 +1,5 @@
+import { CAT_SPRITES, CAT_PX } from './sprites.js';
+
 // 절차적 고양이 그리기. 로컬 좌표: 발밑 중심 원점, 오른쪽을 바라봄, y는 위로 음수.
 const TAU = Math.PI * 2;
 
@@ -286,5 +288,66 @@ export function drawCat(ctx, cat, look, time, view) {
   if (legsF[0]) limb(ctx, legsF[0][0], legsF[0][1], legsF[0][2], legsF[0][3], 16, body, pawC);
 
   head(ctx, H[0], H[1], H[2], look, face);
+  ctx.restore();
+}
+
+
+function blit(ctx, img, def, sx = 1, sy = 1) {
+  const w = img.width * CAT_PX, h = img.height * CAT_PX;
+  ctx.save();
+  ctx.scale(sx, sy);
+  ctx.drawImage(img, -def.anchor[0] * CAT_PX, -def.anchor[1] * CAT_PX, w, h);
+  ctx.restore();
+}
+
+/** 스프라이트 아트로 고양이 그리기 (로직이 계산한 pivot/angle 변환을 그대로 사용) */
+export function drawCatSprite(ctx, cat, set, time) {
+  const pose = poseOf(cat);
+  const t = time;
+  ctx.save();
+  ctx.translate(cat.pivot.x, cat.pivot.y);
+  ctx.scale(cat.facing, 1);
+  ctx.rotate(cat.angle);
+  ctx.translate(-cat.pivotLocal.x, -cat.pivotLocal.y);
+  ctx.scale(cat.size, cat.size);
+
+  switch (pose) {
+    case 'pounce': {
+      // 앞발 기준점에 맞춰 그리고, 진행 방향으로 몸을 눕힘
+      ctx.translate(cat.pivotLocal.x / cat.size, cat.pivotLocal.y / cat.size);
+      ctx.rotate(0.8);
+      blit(ctx, set.jump, CAT_SPRITES.jump);
+      break;
+    }
+    case 'hold':
+      ctx.translate(Math.sin(t * 40) * 1.5, 0);
+      blit(ctx, set.swat, CAT_SPRITES.swat, 1, 1 + Math.sin(t * 20) * 0.015);
+      break;
+    case 'happy':
+      ctx.translate(0, -Math.abs(Math.sin(t * 6)) * 14);
+      blit(ctx, set.swat, CAT_SPRITES.swat);
+      break;
+    case 'sit':
+      blit(ctx, set.sit, CAT_SPRITES.sit, 1, 1 + Math.sin(t * 2) * 0.012);
+      break;
+    case 'lie': // 삐짐: 등을 돌리고 앉음
+      ctx.globalAlpha = 0.92;
+      blit(ctx, set.sit, CAT_SPRITES.sit, -1, 0.97);
+      break;
+    case 'crouch': {
+      const wig = cat.cued ? 0 : Math.sin(t * 30) * 4;
+      ctx.translate(wig, 0);
+      blit(ctx, set.crouch, CAT_SPRITES.crouch, 1.03, cat.cued ? 0.86 : 0.93);
+      break;
+    }
+    case 'walk':
+      ctx.translate(0, -Math.abs(Math.sin(cat.walkPhase)) * 6);
+      blit(ctx, set.crouch, CAT_SPRITES.crouch, 1, 1 + Math.sin(cat.walkPhase * 2) * 0.02);
+      break;
+    default: { // stand / land
+      const squash = cat.state === 'land' && cat.t < 0.12 ? 0.9 : 1;
+      blit(ctx, set.crouch, CAT_SPRITES.crouch, 1, squash);
+    }
+  }
   ctx.restore();
 }

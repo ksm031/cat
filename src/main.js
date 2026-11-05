@@ -7,6 +7,7 @@ import { Renderer } from './render/Renderer.js';
 import { UI } from './ui/UI.js';
 import { Sfx } from './audio/Sfx.js';
 import { storage, haptics } from './platform/platform.js';
+import { sprites } from './render/sprites.js';
 
 const SIM_DT = 1 / 120;
 const KEY_SPEED = 900;       // 키보드/스틱 낚싯대 속도 (월드 단위/초)
@@ -43,6 +44,7 @@ class App {
     addEventListener('keydown', unlock);
     document.addEventListener('visibilitychange', () => { if (document.hidden && this.mode === 'play') this.pause(); });
 
+    sprites.load(); // 비동기: 로드 전/실패 시엔 벡터 고양이로 표시
     this.ui.show('title');
     this.last = performance.now();
     requestAnimationFrame((t) => this.frame(t));
